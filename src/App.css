@@ -1,42 +1,76 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+.imagecontainer{
+  background-image: url("./assets/sample.jpg");
+}
+.contentcontainer {
+  width: 40%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.formcontainer{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.input-field {
+  position: relative;
+  margin-bottom: 20px;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.input-field input {
+  width: 300px;
+  height: 50px;
+  border-radius: 6px;
+  font-size: 18px;
+  padding: 0 15px;
+  border: 1px solid #000;
+  background: transparent;
+  color: #000;
+  outline: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.formcontainer a {
+  text-decoration: none;
+  color: orange;
+  font: weight 600;
 }
 
-.card {
-  padding: 2em;
+.input-field label {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  color: #000;
+  font-size: 19px;
+  pointer-events: none;
+  transition: 0.3s;
+  background: transparent;
 }
 
-.read-the-docs {
-  color: #888;
+.input-field input:focus {
+  border: 1px solid orange;
+}
+
+.input-field input:focus ~ label,
+.input-field input:valid ~ label {
+  color: orange;
+  top: 0;
+  left: 10px;
+  font-size: 14px;
+  background: #fff;
+  padding: 0 5px;
+}
+
+button {
+  width: 300px;
+  height: 50px;
+  outline: none;
+  border: none;
+  color: white;
+  background-color: orange;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: 600;
 }
