@@ -1,3 +1,7 @@
+body {
+  background-color: #ddd;
+}
+
 .imagecontainer{
   background-image: url("./assets/sample.jpg");
 }
@@ -87,4 +91,56 @@ h1 .title{
 }
 .title .ul .li{
     padding-right: 0 5px;
+}
+
+/* header */
+
+.userscreen {
+  width: 100%;
+  height: 100vh;
+  background-color: #e4e4e4;
+}
+
+header {
+  position: fixed;
+  width: 100%;
+  height: 60px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 10px;
+}
+
+.logo {
+  width: 200px;
+  height: 50px;
+}
+
+.logo img {
+  width: 100%;
+  height: 100%;
+}
+
+.profile {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 10px;
+
+}
+
+.profile p {
+  padding: 0;
+  margin: 0;
+}
+
+.profile p:nth-child(2){
+  font-size: 14px;
+}
+
+.profile img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
 }
