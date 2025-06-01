@@ -17,7 +17,7 @@ function Sidebar() {
 
   return (
     <div
-      className={`d-flex flex-column bg-white border-end shadow-sm ${
+      className={`d-flex flex-column justify-content-between bg-white border-end shadow-sm ${
         collapsed ? "p-2" : "p-3"
       }`}
       style={{ width: collapsed ? "70px" : "250px", height: "100vh", transition: "0.3s" }}
@@ -32,7 +32,7 @@ function Sidebar() {
       </button> */}
 
       {/* Menu */}
-      <ul className="nav nav-pills flex-column mb-auto mt-5">
+      <ul className="nav nav-pills flex-column mb-auto">
         {menuItems.map((item, index) => (
           <li className="nav-item mb-2" key={index}>
             <a href="#" className="nav-link text-dark d-flex align-items-center">
@@ -45,7 +45,7 @@ function Sidebar() {
 
       {/* Footer */}
       {!collapsed && (
-        <div className="mt-auto small text-muted">
+        <div className="mb-5 pb-3 small text-muted text-center">
           <hr />
           Swift Prosys © 2025 HRM
         </div>
