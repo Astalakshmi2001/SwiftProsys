@@ -1,6 +1,4 @@
 import React from 'react'
-// import '../../App.css'
-// import { Colors } from '../../constant/colors'
 import sampleImage from '../../assets/sample.jpg';
 
 function Login() {
@@ -53,12 +51,12 @@ function Login() {
             Login
           </button>
 
-          <p className="text-sm">
+          {/* <p className="text-sm">
             Don't have an account?{" "}
             <a href="/signup" className="text-orange-500 font-semibold">
               Signup
             </a>
-          </p>
+          </p> */}
         </div>
       </div>
     </div>

@@ -7,7 +7,7 @@ function AdminScreen() {
   const [collapsed, setCollapsed] = useState(false);
   const toggleSidebar = () => setCollapsed((prev) => !prev);
   return (
-    <div className="w-full h-screen bg-gray-200">
+    <div className="w-full h-screen bg-gray-100">
       <Header collapsed={collapsed} toggleSidebar={toggleSidebar} />
 
       <div className="flex">
@@ -15,7 +15,7 @@ function AdminScreen() {
           <Sidebar collapsed={collapsed} />
         </div>
 
-        <div className={`flex-grow mt-[60px] h-[calc(100vh-60px)] overflow-y-auto p-4 transition-all duration-300 ${collapsed ? "ml-[70px]" : "ml-[250px]"}`}>
+        <div className={`flex-grow mt-[60px] h-[calc(100vh-60px)] overflow-y-auto p-2 transition-all duration-300 ${collapsed ? "ml-[70px]" : "ml-[250px]"}`}>
           <Outlet />
         </div>
       </div>
