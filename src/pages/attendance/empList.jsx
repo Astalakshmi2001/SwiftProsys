@@ -1,34 +1,176 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-const EmployeeList = ({ employees, onAddClick }) => {
-    
+const EmployeeList = ({ onAddClick }) => {
+  const [employees, setEmployees] = useState([]);
+  const [sortBy, setSortBy] = useState('');
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      const data = await getAllEmployees();
+      setEmployees(data);
+    };
+
+    fetchEmployees();
+  }, []);
+
+  const getAllEmployees = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/employees', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch employees');
+      }
+
+      const employees = await response.json();
+      return employees;
+
+    } catch (error) {
+      console.error('Error fetching employee data:', error);
+      return [];
+    }
+  };
+
+  const handleSort = (key) => {
+    if (sortBy === key) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(key);
+      setSortOrder('asc');
+    }
+  };
+
+  const sortedEmployees = [...employees].sort((a, b) => {
+    const valA = a[sortBy]?.toLowerCase?.() || '';
+    const valB = b[sortBy]?.toLowerCase?.() || '';
+    return sortOrder === 'asc'
+      ? valA.localeCompare(valB)
+      : valB.localeCompare(valA);
+  });
+
+  const paginatedEmployees = sortedEmployees.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  const totalPages = Math.ceil(employees.length / pageSize);
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Employee List</h2>
+    <div className="container-fluid bg-gray-100 px-0">
+      <div className="bg-white p-3 rounded">
+        <div className="flex justify-between">
+          <h2 className="text-xl font-bold mb-6">Employee List</h2>
+          <button onClick={onAddClick} className="mb-6 bg-blue-500 text-white text-sm px-2 py-2 rounded hover:bg-indigo-700 transition">
+            + Add New Employee
+          </button>
+        </div>
 
-      <button onClick={onAddClick} className="mb-6 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
-        + Add New Employee
-      </button>
+        {employees.length === 0 ? (
+          <p className="text-gray-500">No employees added yet.</p>
+        ) : (
+          <>
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-2 text-left">#</th>
+                  <th
+                    className="px-4 py-2 text-left cursor-pointer"
+                    onClick={() => handleSort('firstName')}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Name</span>
+                      <span className="flex flex-col text-xs leading-none">
+                        <i className={`bx bxs-chevron-up ${sortBy === 'firstName' && sortOrder === 'asc' ? 'text-black' : 'text-gray-400'}`}></i>
+                        <i className={`bx bxs-chevron-down ${sortBy === 'firstName' && sortOrder === 'desc' ? 'text-black' : 'text-gray-400'}`}></i>
+                      </span>
+                    </div>
+                  </th>
 
-      {employees.length === 0 ? (
-        <p className="text-gray-500">No employees added yet.</p>
-      ) : (
-        <ul className="space-y-4">
-          {employees.map(emp => (
-            <li key={emp.id} className="p-4 border rounded shadow-sm flex items-center space-x-4">
-              {emp.previewImage ? (
-                <img src={emp.previewImage} alt="" className="w-12 h-12 rounded-full" />
-              ) : (
-                <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-white">👤</div>
-              )}
-              <div>
-                <p className="font-semibold">{emp.firstName} {emp.lastName}</p>
-                <p className="text-sm text-gray-500">{emp.position} - {emp.department}</p>
+                  <th
+                    className="px-4 py-2 text-left cursor-pointer"
+                    onClick={() => handleSort('position')}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Position</span>
+                      <span className="flex flex-col text-xs leading-none">
+                        <i className={`bx bxs-chevron-up ${sortBy === 'position' && sortOrder === 'asc' ? 'text-black' : 'text-gray-400'}`}></i>
+                        <i className={`bx bxs-chevron-down ${sortBy === 'position' && sortOrder === 'desc' ? 'text-black' : 'text-gray-400'}`}></i>
+                      </span>
+                    </div>
+                  </th>
+
+                  <th
+                    className="px-4 py-2 text-left cursor-pointer"
+                    onClick={() => handleSort('department')}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Department</span>
+                      <span className="flex flex-col text-xs leading-none">
+                        <i className={`bx bxs-chevron-up ${sortBy === 'department' && sortOrder === 'asc' ? 'text-black' : 'text-gray-400'}`}></i>
+                        <i className={`bx bxs-chevron-down ${sortBy === 'department' && sortOrder === 'desc' ? 'text-black' : 'text-gray-400'}`}></i>
+                      </span>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {paginatedEmployees.map((emp) => (
+                  <tr key={emp.id}>
+                    <td className="px-4 py-2">{emp.id}</td>
+                    <td className="px-4 py-2 flex gap-2 items-center">
+                      {emp.previewImage ? (
+                        <img
+                          src={emp.previewImage}
+                          alt=""
+                          className="w-10 h-10 rounded-full"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-white">
+                          👤
+                        </div>
+                      )}
+                      {emp.firstName} {emp.lastName}
+                    </td>
+                    <td className="px-4 py-2">{emp.position}</td>
+                    <td className="px-4 py-2">{emp.department}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Pagination */}
+            <div className="mt-4 flex justify-between items-center">
+              <p className="text-sm text-gray-600">
+                Page {currentPage} of {totalPages}
+              </p>
+              <div className="space-x-2">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
+                >
+                  Next
+                </button>
               </div>
-            </li>
-          ))}
-        </ul>
-      )}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };
