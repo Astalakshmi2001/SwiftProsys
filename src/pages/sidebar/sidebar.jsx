@@ -1,52 +1,48 @@
 import React, { useState } from "react";
 import "../../App.css";
+import mainlogo from "../../assets/mainlogo.png";
+import logo from "../../assets/logo.png";
 
-function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
-
-  const toggleSidebar = () => setCollapsed(!collapsed);
-
+function Sidebar({ collapsed }) {
   const menuItems = [
-    { name: "Dashboard", icon: "bi-speedometer2" },
-    { name: "Employees", icon: "bi-people-fill" },
-    { name: "Attendance", icon: "bi-calendar-check" },
-    { name: "Departments", icon: "bi-diagram-3" },
-    { name: "Reports", icon: "bi-bar-chart" },
-    { name: "Logout", icon: "bi-box-arrow-right" },
+    { name: "Dashboard", icon: "bx bxs-dashboard" },
+    { name: "Employees", icon: "bx bx-user" },
+    { name: "Attendance", icon: "bx bx-calendar-event" },
+    { name: "Departments", icon: "bx bx-buildings" },
+    { name: "Reports", icon: "bx bx-bar-chart-alt-2" },
+    { name: "Logout", icon: "bx bx-log-out-circle" },
   ];
 
   return (
     <div
-      className={`d-flex flex-column justify-content-between bg-white border-end shadow-sm ${
-        collapsed ? "p-2" : "p-3"
-      }`}
-      style={{ width: collapsed ? "70px" : "250px", height: "100vh", transition: "0.3s" }}
+      className={`flex flex-col bg-white border-r transition-all duration-300 ${collapsed ? "p-2 w-[70px]" : "p-2 w-[250px]"
+        } h-[100vh]`}
     >
-      {/* Toggle Button */}
-      {/* <button
-        onClick={toggleSidebar}
-        className="btn btn-outline-primary mb-4"
-        style={{ alignSelf: collapsed ? "center" : "flex-end" }}
-      >
-        <i className={`bi ${collapsed ? "bi-arrow-right-square" : "bi-arrow-left-square"}`}></i>
-      </button> */}
-
-      {/* Menu */}
-      <ul className="nav nav-pills flex-column mb-auto">
+      {!collapsed ? (
+        <div className="w-[200px] h-[50px]">
+          <img src={mainlogo} alt="SwiftProsys" className="w-full h-full" />
+        </div>
+      ) : (
+        <div className="w-[50px] h-[45px]">
+          <img src={logo} alt="SwiftProsys" className="w-full h-full" />
+        </div>
+      )}
+      <ul className="flex flex-col grow px-2 my-3">
         {menuItems.map((item, index) => (
-          <li className="nav-item mb-2" key={index}>
-            <a href="#" className="nav-link text-dark d-flex align-items-center">
-              <i className={`bi ${item.icon} fs-5 me-2`}></i>
+          <li className="mb-2" key={index}>
+            <a
+              href="#"
+              className="flex items-center p-2 no-underline text-gray-800 rounded-md hover:bg-primary hover:text-white transition-colors"
+            >
+              <i className={`${item.icon} text-xl me-2`}></i>
               {!collapsed && <span>{item.name}</span>}
             </a>
           </li>
         ))}
       </ul>
-
-      {/* Footer */}
       {!collapsed && (
-        <div className="mb-5 pb-3 small text-muted text-center">
-          <hr />
+        <div className="text-xs text-gray-500 text-center px-2 py-3">
+          <hr className="my-2" />
           Swift Prosys © 2025 HRM
         </div>
       )}
