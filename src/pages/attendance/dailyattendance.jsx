@@ -1,11 +1,12 @@
-import React from 'react'
+import React from 'react';
+import PunchCard from '../../components/punchCard';
 
-function dailyattendance() {
+function Attendance() {
   return (
     <div>
-      
+      <PunchCard />
     </div>
   )
 }
 
-export default dailyattendance
+export default Attendance
