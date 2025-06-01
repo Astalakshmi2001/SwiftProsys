@@ -1,34 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '../pages/header/header';
 import Sidebar from '../pages/sidebar/sidebar';
 import { Outlet } from 'react-router-dom';
 
 function UserScreen() {
+  const [collapsed, setCollapsed] = useState(false);
+  const toggleSidebar = () => setCollapsed((prev) => !prev);
   return (
-    <div className="userscreen">
-      <Header />
-      <div className="d-flex">
-        <div
-          style={{
-            position: 'fixed',
-            top: '60px',
-            left: 0,
-            overflowY: 'auto',
-          }}
-        >
-          <Sidebar />
+    <div className="w-full h-screen bg-gray-200">
+      <Header collapsed={collapsed} toggleSidebar={toggleSidebar} />
+
+      <div className="flex">
+        <div className="fixed top-0 left-0 overflow-y-auto">
+          <Sidebar collapsed={collapsed} />
         </div>
-        <div
-          className="flex-grow-1"
-          style={{
-            marginLeft: '240px',
-            marginTop: '60px', // match Header height
-            height: 'calc(100vh - 60px)',
-            overflowY: 'auto',
-            padding: '1rem',
-          }}
-        >
-          <Outlet /> {/* Page content renders here */}
+
+        <div className={`flex-grow mt-[60px] h-[calc(100vh-60px)] overflow-y-auto p-4 transition-all duration-300 ${collapsed ? "ml-[70px]" : "ml-[250px]"}`}>
+          <Outlet />
         </div>
       </div>
     </div>

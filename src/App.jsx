@@ -11,14 +11,12 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* <Route path="/" element={<Login />} /> */}
+        <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/Production" element={<Production_report />} />
-        {/* <Route path="/userscreen" element={<UserScreen />} /> */}
-        <Route path="/" element={<UserScreen />}>
+        <Route path="/userscreen" element={<UserScreen />} /> 
+          <Route path="/" element={<UserScreen />}>
           <Route index element={<Attendance />} />
-          {/* <Route path="attendance" element={<Attendance />} /> */}
-          {/* Add more routes here */}
         </Route>
       </Routes>
     </Router>
