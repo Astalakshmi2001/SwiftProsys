@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { positions, departments } from '../../constant/data';
+import { Link } from 'react-router-dom';
 
-const AddEmployee = ({ onAddEmployee, onBack }) => {
+const AddEmployee = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [employee, setEmployee] = useState({
     firstName: '',
@@ -11,7 +12,6 @@ const AddEmployee = ({ onAddEmployee, onBack }) => {
     department: '',
     phone: '',
     employeeid: '',
-    username: '',
     password: '',
     profileImage: null,
     previewImage: '',
@@ -69,7 +69,6 @@ const AddEmployee = ({ onAddEmployee, onBack }) => {
         department: '',
         phone: '',
         employeeid: '',
-        username: '',
         password: '',
         profileImage: null,
         previewImage: '',
@@ -88,10 +87,10 @@ const AddEmployee = ({ onAddEmployee, onBack }) => {
   return (
     <div className="container-fluid bg-gray-100 px-0">
       <div className="bg-white p-3 rounded">
-        <button onClick={onBack} className="mb-4 text-indigo-600 hover:underline">
+        <Link to="/emplist" className="mb-6 text-indigo-600 text-decoration-none">
           ← Back to Employee List
-        </button>
-        <h2 className="text-2xl font-bold mb-6">Add New Employee</h2>
+        </Link>
+        <h2 className="text-2xl font-bold mb-6 mt-6">Add New Employee</h2>
         {successMessage && (
           <div className="mb-4 p-3 bg-green-100 text-green-700 rounded">
             {successMessage}
@@ -171,15 +170,7 @@ const AddEmployee = ({ onAddEmployee, onBack }) => {
               name="employeeid"
               value={employee.employeeid}
               onChange={handleChange}
-              placeholder="Employee ID"
-              className="border border-gray-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-              required
-            />
-            <input
-              name="username"
-              value={employee.username}
-              onChange={handleChange}
-              placeholder="Username"
+              placeholder="Employee ID/Username"
               className="border border-gray-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               required
             />

@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const EmployeeList = ({ onAddClick }) => {
+const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
   const [sortBy, setSortBy] = useState('');
   const [sortOrder, setSortOrder] = useState('asc');
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 5;
+  const pageSize = 10;
+  const navigate = useNavigate();
+
+  const goToEmployees = () => {
+    navigate('/addemployee');
+  };
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -66,7 +72,7 @@ const EmployeeList = ({ onAddClick }) => {
       <div className="bg-white p-3 rounded">
         <div className="flex justify-between">
           <h2 className="text-xl font-bold mb-6">Employee List</h2>
-          <button onClick={onAddClick} className="mb-6 bg-blue-500 text-white text-sm px-2 py-2 rounded hover:bg-indigo-700 transition">
+          <button onClick={goToEmployees} className="mb-6 bg-blue-500 text-white text-sm px-2 py-2 rounded hover:bg-indigo-700 transition">
             + Add New Employee
           </button>
         </div>
@@ -81,10 +87,22 @@ const EmployeeList = ({ onAddClick }) => {
                   <th className="px-4 py-2 text-left">#</th>
                   <th
                     className="px-4 py-2 text-left cursor-pointer"
+                    onClick={() => handleSort('employeeid')}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span className='text-xs'>Employee ID</span>
+                      <span className="flex flex-col text-xs leading-none">
+                        <i className={`bx bxs-chevron-up ${sortBy === 'employeeid' && sortOrder === 'asc' ? 'text-black' : 'text-gray-400'}`}></i>
+                        <i className={`bx bxs-chevron-down ${sortBy === 'employeeid' && sortOrder === 'desc' ? 'text-black' : 'text-gray-400'}`}></i>
+                      </span>
+                    </div>
+                  </th>
+                  <th
+                    className="px-4 py-2 text-left cursor-pointer"
                     onClick={() => handleSort('firstName')}
                   >
                     <div className="flex items-center space-x-1">
-                      <span>Name</span>
+                      <span className='text-xs'>Name</span>
                       <span className="flex flex-col text-xs leading-none">
                         <i className={`bx bxs-chevron-up ${sortBy === 'firstName' && sortOrder === 'asc' ? 'text-black' : 'text-gray-400'}`}></i>
                         <i className={`bx bxs-chevron-down ${sortBy === 'firstName' && sortOrder === 'desc' ? 'text-black' : 'text-gray-400'}`}></i>
@@ -97,7 +115,7 @@ const EmployeeList = ({ onAddClick }) => {
                     onClick={() => handleSort('position')}
                   >
                     <div className="flex items-center space-x-1">
-                      <span>Position</span>
+                      <span className='text-xs'>Position</span>
                       <span className="flex flex-col text-xs leading-none">
                         <i className={`bx bxs-chevron-up ${sortBy === 'position' && sortOrder === 'asc' ? 'text-black' : 'text-gray-400'}`}></i>
                         <i className={`bx bxs-chevron-down ${sortBy === 'position' && sortOrder === 'desc' ? 'text-black' : 'text-gray-400'}`}></i>
@@ -110,19 +128,22 @@ const EmployeeList = ({ onAddClick }) => {
                     onClick={() => handleSort('department')}
                   >
                     <div className="flex items-center space-x-1">
-                      <span>Department</span>
+                      <span className='text-xs'>Department</span>
                       <span className="flex flex-col text-xs leading-none">
                         <i className={`bx bxs-chevron-up ${sortBy === 'department' && sortOrder === 'asc' ? 'text-black' : 'text-gray-400'}`}></i>
                         <i className={`bx bxs-chevron-down ${sortBy === 'department' && sortOrder === 'desc' ? 'text-black' : 'text-gray-400'}`}></i>
                       </span>
                     </div>
                   </th>
+                  <th className="px-4 py-2 text-left text-xs">Phone Number</th>
+                  <th className="px-4 py-2 text-left text-xs">Join Date</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {paginatedEmployees.map((emp) => (
-                  <tr key={emp.id}>
-                    <td className="px-4 py-2">{emp.id}</td>
+                {paginatedEmployees.map((emp, index) => (
+                  <tr key={index}>
+                    <td className="px-4 py-2">{index + 1}</td>
+                    <td className="px-4 py-2">{emp.employeeid}</td>
                     <td className="px-4 py-2 flex gap-2 items-center">
                       {emp.previewImage ? (
                         <img
@@ -139,6 +160,8 @@ const EmployeeList = ({ onAddClick }) => {
                     </td>
                     <td className="px-4 py-2">{emp.position}</td>
                     <td className="px-4 py-2">{emp.department}</td>
+                    <td className="px-4 py-2">{emp.phone}</td>
+                    <td className="px-4 py-2">{emp.joinDate}</td>
                   </tr>
                 ))}
               </tbody>
