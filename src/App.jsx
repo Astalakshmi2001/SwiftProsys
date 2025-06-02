@@ -11,7 +11,7 @@ import AdminScreen from './screens/adminScreen';
 
 function App() {
   const role = "admin";
-  
+
   return (
     <Router>
       <Routes>
@@ -28,23 +28,8 @@ function App() {
           <>
             {/* <Route path="/adminscreen" element={<AdminScreen />} /> */}
             <Route path="/" element={<AdminScreen />}>
-              <Route
-                index
-                element={
-                  <EmployeeList
-                    onAddClick={() => window.location.href = '/addemployee'}
-                  />
-                }
-              />
-              <Route
-                path="/addemployee"
-                element={
-                  <AddEmployee
-                    onAddEmployee={undefined}
-                    onBack={() => window.location.href = '/'}
-                  />
-                }
-              />
+              <Route path="/emplist" element={<EmployeeList />} />
+              <Route path="/addemployee" element={<AddEmployee />} />
             </Route>
           </>
         ) : (
