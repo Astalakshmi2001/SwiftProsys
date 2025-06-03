@@ -1,7 +1,62 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom';
 import sampleImage from '../../assets/sample.jpg';
+import { jwtDecode } from "jwt-decode"
 
 function Login() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ employeeid: username, password }),
+      });
+
+      const data = await response.json();
+      setLoading(false);
+
+      if (!response.ok) {
+        setErrorMsg(data.error || 'Login failed');
+        return;
+      }
+
+      const token = data.token;
+
+      // ✅ Decode the token to get role
+      const decoded = jwtDecode(token); // Not jwt_decode.default!
+      const role = decoded.role;
+
+      // ✅ Store in localStorage
+      localStorage.setItem('token', token);
+      localStorage.setItem('role', role);
+
+      // ✅ Redirect based on role
+      if (role === 'admin') {
+        navigate('/emplist');
+      } else {
+        navigate('/');
+      }
+
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+      setErrorMsg('Something went wrong. Try again.');
+    }
+  };
+
   return (
     <div className="w-full h-screen flex p-0 m-0">
       <div
@@ -10,13 +65,17 @@ function Login() {
       ></div>
 
       <div className="w-[40%] flex justify-center items-center">
-        <div className="flex flex-col items-center gap-3">
+        <form onSubmit={handleLogin} className="flex flex-col items-center gap-3">
           <h3 className="text-2xl font-semibold">Login</h3>
-
+          {errorMsg && (
+            <p className="text-red-600 text-sm font-medium">{errorMsg}</p>
+          )}
           <div className="relative mb-3">
             <input
               type="text"
               id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               className="w-[300px] h-[50px] border border-black rounded-md text-lg px-4 bg-transparent text-black focus:outline-none focus:border-orange-500 peer"
             />
@@ -32,6 +91,8 @@ function Login() {
             <input
               type="password"
               id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               className="w-[300px] h-[50px] border border-black rounded-md text-lg px-4 bg-transparent text-black focus:outline-none focus:border-orange-500 peer"
             />
@@ -47,8 +108,8 @@ function Login() {
             Forgot Password
           </a>
 
-          <button className="w-[300px] h-[50px] bg-orange-500 text-white font-semibold rounded-md transition-transform duration-300 hover:shadow-lg">
-            Login
+          <button type="submit" disabled={loading} className="w-[300px] h-[50px] bg-orange-500 text-white font-semibold rounded-md transition-transform duration-300 hover:shadow-lg disabled:opacity-60">
+            {loading ? 'Logging in...' : 'Login'}
           </button>
 
           {/* <p className="text-sm">
@@ -57,7 +118,7 @@ function Login() {
               Signup
             </a>
           </p> */}
-        </div>
+        </form>
       </div>
     </div>
   )
