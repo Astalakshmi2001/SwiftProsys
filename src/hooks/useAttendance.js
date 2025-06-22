@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-const API_BASE_URL = "http://localhost:3000/api";
+const API_BASE_URL = "http://192.168.148.123:3000/api";
 
 const useAttendance = () => {
   const storeAttendance = useCallback(async (attendanceData) => {

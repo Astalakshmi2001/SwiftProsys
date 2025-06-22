@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const API_URL = 'http://localhost:3000/api/auth';
+const API_URL = 'http://192.168.148.123:3000/api/auth';
 
 const useAuth = () => {
   const [user, setUser] = useState(null);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { positions, departments } from '../../constant/data';
+import { departmentPositionMap, departments } from '../../constant/data';
 import { Link } from 'react-router-dom';
 
 const AddEmployee = () => {
@@ -23,8 +23,14 @@ const AddEmployee = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setEmployee(prev => ({ ...prev, [name]: value }));
+    setEmployee((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "department" ? { position: "" } : {})
+    }));
   };
+
+  const availablePositions = departmentPositionMap[employee.department] || [];
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -128,20 +134,6 @@ const AddEmployee = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <select
-              name="position"
-              value={employee.position}
-              onChange={handleChange}
-              className="border border-gray-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-              required
-            >
-              <option value="">Select Position</option>
-              {positions.map((dept) => (
-                <option key={dept.key} value={dept.key}>
-                  {dept.label}
-                </option>
-              ))}
-            </select>
-            <select
               name="department"
               value={employee.department}
               onChange={handleChange}
@@ -150,6 +142,20 @@ const AddEmployee = () => {
             >
               <option value="">Select Department</option>
               {departments.map((dept) => (
+                <option key={dept.key} value={dept.key}>
+                  {dept.label}
+                </option>
+              ))}
+            </select>
+            <select
+              name="position"
+              value={employee.position}
+              onChange={handleChange}
+              className="border border-gray-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              required
+            >
+              <option value="">Select Position</option>
+              {availablePositions.map((dept) => (
                 <option key={dept.key} value={dept.key}>
                   {dept.label}
                 </option>
