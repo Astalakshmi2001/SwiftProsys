@@ -16,6 +16,7 @@ const AddEmployee = () => {
     profileImage: null,
     previewImage: '',
     joinDate: '',
+    role: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -73,6 +74,7 @@ const AddEmployee = () => {
         profileImage: null,
         previewImage: '',
         joinDate: '',
+        role: ''
       });
 
       onAddEmployee?.({ id: Date.now(), ...employee });
@@ -191,6 +193,17 @@ const AddEmployee = () => {
                 <i className={`bx ${showPassword ? 'bx-hide' : 'bx-show'} text-xl`}></i>
               </span>
             </div>
+            <select
+              name="role"
+              value={employee.role}
+              onChange={handleChange}
+              className="border border-gray-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              required
+            >
+              <option value="">Select Role</option>
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex flex-col">

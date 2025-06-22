@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import useAuth from "../hooks/useAuth";
 import useAttendance from "../hooks/useAttendance";
+import { projects } from "../constant/data";
 
 const ClockInDashboard = () => {
   const { user } = useAuth();
@@ -168,9 +169,11 @@ const ClockInDashboard = () => {
                   className="border border-gray-300 rounded-md px-3 py-1 text-sm"
                 >
                   <option value="">Select Project</option>
-                  <option value="Russian Army">Russian Army</option>
-                  <option value="US Marines">US Marines</option>
-                  <option value="Cyber Division">Cyber Division</option>
+                  {projects.map((dept) => (
+                    <option key={dept.key} value={dept.key}>
+                      {dept.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>

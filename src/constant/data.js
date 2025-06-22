@@ -21,3 +21,7 @@ export const departments = [
   { key: "project_training", label: "Project Training" },
   { key: "basic_training", label: "Basic Training" }
 ];
+
+export const projects = [
+  { key: "Russian_Army", label: "Russian Army" },
+];

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useEmployees from '../../hooks/useEmployees';
 
 const EmployeeList = () => {
-  const [employees, setEmployees] = useState([]);
+  const { employees } = useEmployees();
   const [sortBy, setSortBy] = useState('');
   const [sortOrder, setSortOrder] = useState('asc');
   const [currentPage, setCurrentPage] = useState(1);
@@ -10,38 +11,7 @@ const EmployeeList = () => {
   const navigate = useNavigate();
 
   const goToEmployees = () => {
-    navigate('/addemployee');
-  };
-
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      const data = await getAllEmployees();
-      setEmployees(data);
-    };
-
-    fetchEmployees();
-  }, []);
-
-  const getAllEmployees = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/api/employees', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch employees');
-      }
-
-      const employees = await response.json();
-      return employees;
-
-    } catch (error) {
-      console.error('Error fetching employee data:', error);
-      return [];
-    }
+    navigate('/admin/addemployee');
   };
 
   const handleSort = (key) => {
@@ -158,8 +128,12 @@ const EmployeeList = () => {
                       )}
                       {emp.firstName} {emp.lastName}
                     </td>
-                    <td className="px-4 py-2">{emp.position}</td>
-                    <td className="px-4 py-2">{emp.department}</td>
+                    <td className="px-4 py-2">{emp.position?.split("_")
+                      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                      .join(" ")}</td>
+                    <td className="px-4 py-2">{emp.department?.split("_")
+                      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                      .join(" ")}</td>
                     <td className="px-4 py-2">{emp.phone}</td>
                     <td className="px-4 py-2">{emp.joinDate}</td>
                   </tr>

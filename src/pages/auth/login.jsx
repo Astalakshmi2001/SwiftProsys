@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import sampleImage from '../../assets/sample.jpg';
 import { jwtDecode } from "jwt-decode"
@@ -43,11 +43,10 @@ function Login() {
       localStorage.setItem('token', token);
       localStorage.setItem('role', role);
 
-      // ✅ Redirect based on role
       if (role === 'admin') {
-        navigate('/emplist');
-      } else {
-        navigate('/');
+        navigate('/admin');
+      } else if (role === 'user') {
+        navigate('/user');
       }
 
     } catch (err) {
@@ -56,6 +55,13 @@ function Login() {
       setErrorMsg('Something went wrong. Try again.');
     }
   };
+
+  useEffect(() => {
+    const role = localStorage.getItem('role');
+    if (role === 'admin') navigate('/admin');
+    else if (role === 'user') navigate('/user');
+  }, []);
+
 
   return (
     <div className="w-full h-screen flex p-0 m-0">

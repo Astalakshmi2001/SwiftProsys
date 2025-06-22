@@ -2,17 +2,22 @@ import React, { useState } from "react";
 import "../../App.css";
 import mainlogo from "../../assets/mainlogo.png";
 import logo from "../../assets/logo.png";
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 function Sidebar({ collapsed }) {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const role = localStorage.getItem('role'); // or get from props/context
+  const basePath = role === 'admin' ? '/admin' : '/user';
+
   const menuItems = [
-    { name: "Dashboard", icon: "bx bxs-dashboard", url: "/"},
-    { name: "Employees", icon: "bx bx-user", url: "/emplist" },
-    { name: "Attendance", icon: "bx bx-calendar-event" },
-    { name: "Departments", icon: "bx bx-buildings" },
-    { name: "Reports", icon: "bx bx-bar-chart-alt-2" },
-    { name: "Logout", icon: "bx bx-log-out-circle" },
+    { name: "Dashboard", icon: "bx bxs-dashboard", url: `${basePath}` },
+    { name: "Employees", icon: "bx bx-user", url: `${basePath}/emplist` },
+    { name: "Attendance", icon: "bx bx-calendar-event", url: `${basePath}/attendance` },
+    // { name: "Departments", icon: "bx bx-buildings", url: `${basePath}/departments` }, // assuming this route exists
+    { name: "Reports", icon: "bx bx-bar-chart-alt-2", url: `${basePath}/attendancereport` }, // update as needed
+    { name: "Logout", icon: "bx bx-log-out-circle", url: null },
   ];
 
   return (
@@ -35,14 +40,28 @@ function Sidebar({ collapsed }) {
 
           return (
             <li className="mb-2" key={index}>
-              <Link
-                to={item.url}
-                className={`flex items-center p-2 no-underline rounded-md transition-colors
-                ${isActive ? 'bg-maincolor text-white' : 'text-gray-800 hover:bg-maincolor hover:text-white'}`}
-              >
-                <i className={`${item.icon} text-xl me-2`}></i>
-                {!collapsed && <span>{item.name}</span>}
-              </Link>
+              {item.url ? (
+                <Link
+                  to={item.url}
+                  className={`flex items-center p-2 no-underline rounded-md transition-colors
+                  ${isActive ? 'bg-maincolor text-white' : 'text-gray-800 hover:bg-maincolor hover:text-white'}`}
+                >
+                  <i className={`${item.icon} text-xl me-2`}></i>
+                  {!collapsed && <span>{item.name}</span>}
+                </Link>
+              ) : (
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('role');
+                    navigate('/login'); // redirect to login
+                  }}
+                  className="flex items-center w-full p-2 text-left no-underline text-gray-800 rounded-md hover:bg-maincolor hover:text-white transition-colors"
+                >
+                  <i className={`${item.icon} text-xl me-2`}></i>
+                  {!collapsed && <span>{item.name}</span>}
+                </button>
+              )}
             </li>
           );
         })}
