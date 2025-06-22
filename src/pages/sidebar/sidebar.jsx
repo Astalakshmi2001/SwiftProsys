@@ -12,13 +12,13 @@ function Sidebar({ collapsed }) {
   const basePath = role === 'admin' ? '/admin' : '/user';
 
   const menuItems = [
-    { name: "Dashboard", icon: "bx bxs-dashboard", url: `${basePath}` },
-    { name: "Employees", icon: "bx bx-user", url: `${basePath}/emplist` },
-    { name: "Attendance", icon: "bx bx-calendar-event", url: `${basePath}/attendance` },
-    // { name: "Departments", icon: "bx bx-buildings", url: `${basePath}/departments` }, // assuming this route exists
-    { name: "Reports", icon: "bx bx-bar-chart-alt-2", url: `${basePath}/attendancereport` }, // update as needed
-    { name: "Logout", icon: "bx bx-log-out-circle", url: null },
+    { name: "Dashboard", icon: "bx bxs-dashboard", url: `${basePath}`, roles: ["admin"] },
+    { name: "Employees", icon: "bx bx-user", url: `${basePath}/emplist`, roles: ["admin"] },
+    { name: "Attendance", icon: "bx bx-calendar-event", url: role === "admin" ? `${basePath}/attendance` : `${basePath}`, roles: ["admin", "user"] },
+    { name: "Reports", icon: "bx bx-bar-chart-alt-2", url: `${basePath}/attendancereport`, roles: ["admin"] },
+    { name: "Logout", icon: "bx bx-log-out-circle", url: null, roles: ["admin", "user"] },
   ];
+  const visibleMenu = menuItems.filter(item => item.roles.includes(role));
 
   return (
     <div
@@ -35,7 +35,7 @@ function Sidebar({ collapsed }) {
         </div>
       )}
       <ul className="flex flex-col grow px-2 my-3">
-        {menuItems.map((item, index) => {
+        {visibleMenu.map((item, index) => {
           const isActive = location.pathname === item.url;
 
           return (

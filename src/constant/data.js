@@ -67,7 +67,3 @@ export const projects = [
   { key: "lloyds_register", label: "Lloyd’s Register of Shipping" },
   { key: "training_manpowers", label: "Training Manpowers" }
 ];
-
-export const projects = [
-  { key: "Russian_Army", label: "Russian Army" },
-];
