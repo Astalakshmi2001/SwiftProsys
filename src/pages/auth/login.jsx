@@ -17,7 +17,7 @@ function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch('http://192.168.148.123:3000/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
