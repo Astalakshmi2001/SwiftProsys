@@ -1,6 +1,6 @@
 export const positions = [
-  { key: "managers", label: "Managers" },
-  { key: "project_leaders", label: "Project Leaders" },
+  { key: "manager", label: "Manager" },
+  { key: "project_leader", label: "Project Leader" },
   { key: "production_staff", label: "Production Staff" },
   { key: "quality_check", label: "Quality Check" },
   { key: "assistant_admin", label: "Assistant Admin" },

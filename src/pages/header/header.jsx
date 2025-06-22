@@ -1,22 +1,19 @@
 import React from 'react';
+import useAuth from '../../hooks/useAuth';
 
 function Header({ collapsed, toggleSidebar }) {
-    const photoURL = '';
-    const fullName = "Lara"
+    const { user } = useAuth();
     const getRandomColor = () => {
         const letters = "0123456789ABCDEF";
-        let color = "";
-        for (let i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
+        return Array.from({ length: 6 }, () =>
+            letters[Math.floor(Math.random() * 16)]
+        ).join("");
     };
 
     const generateAvatarUrl = (name) => {
-        const firstLetter = name.charAt(0);
+        const firstLetter = name?.charAt(0) || "?";
         const backgroundColor = getRandomColor();
-        const imageSize = 130;
-        return `https://ui-avatars.com/api/?background=${backgroundColor}&size=${imageSize}&color=FFF&font-size=0.60&name=${firstLetter}`;
+        return `https://ui-avatars.com/api/?background=${backgroundColor}&size=130&color=FFF&font-size=0.60&name=${firstLetter}`;
     };
     return (
         <header className="fixed top-0 left-0 w-full h-[60px] bg-white flex justify-between items-center px-2 shadow-sm">
@@ -30,11 +27,17 @@ function Header({ collapsed, toggleSidebar }) {
 
             <div className="flex flex-row-reverse gap-2 items-center">
                 <div>
-                    <p className="m-0 p-0">Lara</p>
-                    <p className="m-0 p-0 text-sm">Project Leader</p>
+                    <p className="m-0 p-0">{user?.firstName}</p>
+                    <p className="m-0 p-0 text-sm">
+                        {user?.position
+                            ?.split("_")
+                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                            .join(" ")
+                        }
+                    </p>
                 </div>
                 <img
-                    src={photoURL ? photoURL : generateAvatarUrl(fullName)}
+                    src={generateAvatarUrl(user?.firstName)}
                     alt="UserImage"
                     className="w-[45px] h-[45px] rounded-full"
                 />
