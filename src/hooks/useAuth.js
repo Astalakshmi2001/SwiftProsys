@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-
-const API_URL = 'http://192.168.148.123:3000/api/auth';
+import { API_URL } from '../constant/api';
 
 const useAuth = () => {
   const [user, setUser] = useState(null);
@@ -13,7 +12,7 @@ const useAuth = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No token found');
 
-      const response = await fetch(`${API_URL}/me`, {
+      const response = await fetch(`${API_URL}/api/auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

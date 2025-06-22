@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import sampleImage from '../../assets/sample.jpg';
-import { jwtDecode } from "jwt-decode"
+import { jwtDecode } from "jwt-decode";
+import { API_URL } from '../../constant/api';
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -17,7 +18,7 @@ function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://192.168.148.123:3000/api/auth/login', {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

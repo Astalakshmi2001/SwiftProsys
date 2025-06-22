@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { departmentPositionMap, departments } from '../../constant/data';
 import { Link } from 'react-router-dom';
+import { API_URL } from '../../constant/api';
 
 const AddEmployee = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -49,7 +50,7 @@ const AddEmployee = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/employees', {
+      const response = await fetch(`${API_URL}/api/employees`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -1,11 +1,10 @@
 import { useCallback } from "react";
-
-const API_BASE_URL = "http://192.168.148.123:3000/api";
+import { API_URL } from '../constant/api';
 
 const useAttendance = () => {
   const storeAttendance = useCallback(async (attendanceData) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/attendance/add`, {
+      const res = await fetch(`${API_URL}/api/attendance/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -34,7 +33,7 @@ const useAttendance = () => {
 
   const getAllAttendance = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/attendance`);
+      const res = await fetch(`${API_URL}/api/attendance`);
       if (!res.ok) throw new Error("Failed to fetch all attendance");
       return await res.json();
     } catch (error) {
@@ -45,7 +44,7 @@ const useAttendance = () => {
 
   const getEmployeeAttendance = useCallback(async (employeeId) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/attendance/${employeeId}`);
+      const res = await fetch(`${API_URL}/api/attendance/${employeeId}`);
       if (!res.ok) throw new Error("Failed to fetch employee attendance");
       return await res.json();
     } catch (error) {
