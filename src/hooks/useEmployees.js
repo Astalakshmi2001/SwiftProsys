@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { API_URL } from '../constant/api';
 
 const useEmployees = () => {
   const [employees, setEmployees] = useState([]);
@@ -8,7 +9,7 @@ const useEmployees = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/employees', {
+        const response = await fetch(`${API_URL}/api/employees`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
