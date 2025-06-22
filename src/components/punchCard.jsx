@@ -1,10 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import dayjs from "dayjs";
 import useAuth from "../hooks/useAuth";
 import useAttendance from "../hooks/useAttendance";
+import { projects } from "../constant/data";
+
+const AUTO_PUNCH_OUT_DELAY = 30 * 60 * 1000;
 
 const ClockInDashboard = () => {
   const { user } = useAuth();
+  const idleTimer = useRef(null);
   const { storeAttendance, getEmployeeAttendance } = useAttendance();
 
   const [isClockedIn, setIsClockedIn] = useState(false);
@@ -125,6 +129,34 @@ const ClockInDashboard = () => {
     }
   };
 
+  useEffect(() => {
+    const resetIdleTimer = () => {
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+      if (isClockedIn && !endTime) {
+        idleTimer.current = setTimeout(() => {
+          console.log("⏰ Auto punch out due to inactivity");
+          handleClockIn(); // auto punch out
+        }, AUTO_PUNCH_OUT_DELAY);
+      }
+    };
+
+    // Listen to user interactions
+    const activityEvents = ["mousemove", "keydown", "mousedown", "touchstart"];
+    activityEvents.forEach(event =>
+      window.addEventListener(event, resetIdleTimer)
+    );
+
+    // Start initial timer
+    resetIdleTimer();
+
+    return () => {
+      activityEvents.forEach(event =>
+        window.removeEventListener(event, resetIdleTimer)
+      );
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+    };
+  }, [isClockedIn, endTime]);
+
   const formatElapsed = (seconds) => {
     if (seconds == null) return "--:--:--";
     const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
@@ -168,9 +200,11 @@ const ClockInDashboard = () => {
                   className="border border-gray-300 rounded-md px-3 py-1 text-sm"
                 >
                   <option value="">Select Project</option>
-                  <option value="Russian Army">Russian Army</option>
-                  <option value="US Marines">US Marines</option>
-                  <option value="Cyber Division">Cyber Division</option>
+                  {projects.map((dept) => (
+                    <option key={dept.key} value={dept.key}>
+                      {dept.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -189,14 +223,18 @@ const ClockInDashboard = () => {
               </div>
             </div>
 
-            {!isClockedIn || !endTime ? (
-              <button
-                onClick={handleClockIn}
-                className="w-full border border-blue-500 text-blue-500 py-2 rounded hover:bg-blue-500 hover:text-white"
-              >
-                {isClockedIn ? "Punch Out" : "Punch In"}
-              </button>
-            ) : null}
+            <div className="w-full">
+              {!isClockedIn || !endTime ? (
+                <button
+                  onClick={handleClockIn}
+                  className="w-full border border-blue-500 text-blue-500 py-2 rounded hover:bg-blue-500 hover:text-white"
+                >
+                  {isClockedIn ? "Punch Out" : "Punch In"}
+                </button>
+              ) : (
+                <p className="text-center text-gray-500">You clocked out at {endTime.toLocaleTimeString()}</p>
+              )}
+            </div>
           </div>
         </div>
       </div>

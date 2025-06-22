@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Login from './pages/auth/login'
 import Signup from './pages/auth/signup'
-import { BrowserRouter as Router, Routes, Route, Navigate  } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/protectedRoute';
 import Production_report from './pages/Production/production_report';
 import UserScreen from './screens/userScreen';
@@ -20,20 +20,19 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/Production" element={<Production_report />} />
 
-        {/* User routes protected */}
-        <Route element={<ProtectedRoute roleAllowed="user" />}>
-          <Route path="/" element={<UserScreen />}>
+        <Route path="/user" element={<ProtectedRoute roleAllowed="user" />}>
+          <Route element={<UserScreen />}>
             <Route index element={<Attendance />} />
           </Route>
         </Route>
 
-        {/* Admin routes protected */}
-        <Route element={<ProtectedRoute roleAllowed="admin" />}>
-          <Route path="/" element={<AdminScreen />}>
+        <Route path="/admin" element={<ProtectedRoute roleAllowed="admin" />}>
+          <Route element={<AdminScreen />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path='attendance' element={<Attendance />} />
             <Route path="emplist" element={<EmployeeList />} />
             <Route path="addemployee" element={<AddEmployee />} />
             <Route path="attendancereport" element={<AttendanceReport />} />
-            <Route path="Admindashboard" element={<AdminDashboard />} />
           </Route>
         </Route>
 
