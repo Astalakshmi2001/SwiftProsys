@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import sampleImage from '../../assets/sample.jpg';
-import { jwtDecode } from "jwt-decode";
-import { API_URL } from '../../constant/api';
+// import { API_URL } from '../../constant/api';
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../../firebaseConfig";
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -14,55 +16,33 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setErrorMsg('');
-    setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ employeeid: username, password }),
-      });
+      const q = query(collection(db, "employees"), where("employeeid", "==", employeeid));
+      const snapshot = await getDocs(q);
+      if (snapshot.empty) throw new Error("Invalid Employee ID");
 
-      const data = await response.json();
-      setLoading(false);
+      const employee = snapshot.docs[0].data();
+      const email = employee.email;
+      const role = employee.role;
 
-      if (!response.ok) {
-        setErrorMsg(data.error || 'Login failed');
-        return;
-      }
+      const auth = getAuth();
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
-      const token = data.token;
+      localStorage.setItem("role", role); // For AuthContext use
 
-      // ✅ Decode the token to get role
-      const decoded = jwtDecode(token); // Not jwt_decode.default!
-      const role = decoded.role;
-
-      // ✅ Store in localStorage
-      localStorage.setItem('token', token);
-      localStorage.setItem('role', role);
-
-      if (role === 'admin') {
-        navigate('/admin');
-      } else if (role === 'user') {
-        navigate('/user');
+      // 🎯 Navigate based on role
+      if (role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/user");
       }
 
     } catch (err) {
-      console.error(err);
-      setLoading(false);
-      setErrorMsg('Something went wrong. Try again.');
+      console.error("Login failed:", err.message);
+      setErrorMsg("Login failed: " + err.message);
     }
   };
-
-  useEffect(() => {
-    const role = localStorage.getItem('role');
-    if (role === 'admin') navigate('/admin');
-    else if (role === 'user') navigate('/user');
-  }, []);
-
 
   return (
     <div className="w-full h-screen flex p-0 m-0">

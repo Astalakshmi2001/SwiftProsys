@@ -1,55 +1,62 @@
 import { useCallback } from "react";
-import { API_URL } from '../constant/api';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  Timestamp,
+} from "firebase/firestore";
+import { db } from "../firebaseConfig"; // update path as needed
 
 const useAttendance = () => {
+  // 🟢 Store attendance
   const storeAttendance = useCallback(async (attendanceData) => {
     try {
-      const res = await fetch(`${API_URL}/api/attendance/add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(attendanceData),
-      });
+      const attendanceWithTimestamp = {
+        ...attendanceData,
+        createdAt: Timestamp.now(),
+      };
 
-      let result;
-      try {
-        result = await res.json();
-      } catch (parseErr) {
-        // JSON parsing failed
-        throw new Error("Server response is not valid JSON");
-      }
-
-      if (!res.ok) {
-        throw new Error(result.message || "Failed to store attendance");
-      }
-
-      return result;
+      const docRef = await addDoc(collection(db, "attendance"), attendanceWithTimestamp);
+      return { id: docRef.id, ...attendanceWithTimestamp };
     } catch (error) {
       console.error("storeAttendance error:", error);
-      throw error;
+      throw new Error("Failed to store attendance");
     }
   }, []);
 
+  // 📄 Get all attendance
   const getAllAttendance = useCallback(async () => {
     try {
-      const res = await fetch(`${API_URL}/api/attendance`);
-      if (!res.ok) throw new Error("Failed to fetch all attendance");
-      return await res.json();
+      const snapshot = await getDocs(query(collection(db, "attendance"), orderBy("createdAt", "desc")));
+      return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
     } catch (error) {
       console.error("getAllAttendance error:", error);
-      throw error;
+      throw new Error("Failed to fetch all attendance");
     }
   }, []);
 
+  // 👤 Get attendance for a specific employee
   const getEmployeeAttendance = useCallback(async (employeeId) => {
     try {
-      const res = await fetch(`${API_URL}/api/attendance/${employeeId}`);
-      if (!res.ok) throw new Error("Failed to fetch employee attendance");
-      return await res.json();
+      const q = query(
+        collection(db, "attendance"),
+        where("employeeId", "==", employeeId),
+        orderBy("createdAt", "desc")
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
     } catch (error) {
       console.error("getEmployeeAttendance error:", error);
-      throw error;
+      throw new Error("Failed to fetch employee attendance");
     }
   }, []);
 

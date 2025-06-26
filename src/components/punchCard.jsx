@@ -3,6 +3,8 @@ import dayjs from "dayjs";
 import useAuth from "../hooks/useAuth";
 import useAttendance from "../hooks/useAttendance";
 import { projects } from "../constant/data";
+import { updateDoc, collection, getDocs, query, where, doc } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
 
 const AUTO_PUNCH_OUT_DELAY = 30 * 60 * 1000;
 
@@ -43,13 +45,11 @@ const ClockInDashboard = () => {
   }, []);
 
   useEffect(() => {
+    if (!user?.employeeid) return;
     const fetchAttendance = async () => {
-      if (!user?.employeeid) return;
       try {
-        const response = await getEmployeeAttendance(user.employeeid);
-        if (response?.data) {
-          setAttendanceData(response.data.reverse());
-        }
+        const records = await getEmployeeAttendance(user.employeeid);
+        setAttendanceData(records);
       } catch (error) {
         console.error("Error fetching attendance:", error.message);
       }
@@ -68,18 +68,17 @@ const ClockInDashboard = () => {
     const formattedTime = time.format("HH:mm:ss");
 
     if (!isClockedIn) {
+      // CLOCK IN
       const punchInPayload = {
         employeeId: user.employeeid,
         firstName: user.firstName,
         project: selectedProject,
-        date: currentTime.format("ddd, DD MMMM YYYY"),
+        date: currentTime.format("YYYY-MM-DD"),
         shift: selectedShift,
-        tracker: [
-          {
-            clockIn: formattedTime,
-            clockOut: "--:--:--"
-          }
-        ]
+        tracker: [{
+          clockIn: formattedTime,
+          clockOut: "--:--:--"
+        }]
       };
 
       try {
@@ -95,25 +94,27 @@ const ClockInDashboard = () => {
         setEndTime(null);
 
         const updated = await getEmployeeAttendance(user.employeeid);
-        setAttendanceData(updated?.data?.reverse() || []);
+        setAttendanceData(updated);
       } catch (error) {
         console.error("Failed to store punch-in:", error.message);
       }
 
     } else {
-      const punchOutPayload = {
-        employeeId: user?.employeeid,
-        firstName: user?.firstName,
-        date: currentTime.format("ddd, DD MMMM YYYY"),
-        tracker: [
-          {
-            clockOut: formattedTime,
-          },
-        ],
-      };
-
+      // CLOCK OUT
       try {
-        await storeAttendance(punchOutPayload);
+        const latest = attendanceData?.[0];
+        if (!latest || !latest.id) {
+          throw new Error("No active session found to punch out.");
+        }
+
+        const updatedTracker = [...latest.tracker];
+        updatedTracker[updatedTracker.length - 1].clockOut = formattedTime;
+
+        const docRef = doc(db, "attendance", latest.id);
+        await updateDoc(docRef, {
+          tracker: updatedTracker
+        });
+
         localStorage.removeItem("attendanceSession");
 
         setEndTime(time);
@@ -122,7 +123,7 @@ const ClockInDashboard = () => {
         setElapsedTime(null);
 
         const updated = await getEmployeeAttendance(user.employeeid);
-        setAttendanceData(updated?.data?.reverse() || []);
+        setAttendanceData(updated);
       } catch (error) {
         console.error("Failed to store punch-out:", error.message);
       }

@@ -1,5 +1,7 @@
+// hooks/useEmployees.js
 import { useEffect, useState } from 'react';
-import { API_URL } from '../constant/api';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebaseConfig'; // adjust path to match your file structure
 
 const useEmployees = () => {
   const [employees, setEmployees] = useState([]);
@@ -9,25 +11,17 @@ const useEmployees = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/employees`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+        const snapshot = await getDocs(collection(db, 'employees'));
+
+        const employeeList = snapshot.docs.map(doc => {
+          const data = doc.data();
+          const { password, ...safeData } = data; // remove password if present
+          return { id: doc.id, ...safeData };
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch employees');
-        }
-
-        const data = await response.json();
-
-        // Remove password field from each employee object
-        const sanitizedData = data.map(({ password, ...rest }) => rest);
-
-        setEmployees(sanitizedData);
+        setEmployees(employeeList);
       } catch (err) {
-        console.error('Error fetching employee data:', err);
+        console.error('Error fetching employees:', err);
         setError(err);
       } finally {
         setLoading(false);

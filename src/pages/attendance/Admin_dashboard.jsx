@@ -48,81 +48,74 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getAllAttendance();
-        setAttendanceData(data?.data || []);
+        const attendanceRecords = await getAllAttendance(); // 🔄 Firestore: already a flat array
+        setAttendanceData(attendanceRecords);
 
         const today = dayjs().format("YYYY-MM-DD");
 
-        // filter today's attendance
-        const todayRecords = data.data.filter(
+        // 🔍 Filter today's attendance records
+        const todayRecords = attendanceRecords.filter(
           (item) => dayjs(item.date).format("YYYY-MM-DD") === today
         );
 
-        // present = has at least one non-empty clockIn
+        // ✅ Count present employees
         const present = new Set();
-        todayRecords.forEach((entry) => {
-          const hasClockIn = entry.tracker?.some(t => t.clockIn && t.clockIn !== "--:--:--");
-          if (hasClockIn) {
-            present.add(entry.employeeId);
-          }
-        });
-
-        setPresentCount(present.size);
-
-        if (employees?.length) {
-          const allEmployeeIds = new Set(employees.map(e => e.employeeid));
-          const leaveCount = [...allEmployeeIds].filter(id => !present.has(id)).length;
-          setLeaveCount(leaveCount);
-        }
-        const departmentMap = {};
-
-        employees.forEach(emp => {
-          const dept = emp.department || "Unassigned";
-          if (!departmentMap[dept]) {
-            departmentMap[dept] = { name: dept, present: 0, total: 0 };
-          }
-
-          departmentMap[dept].total += 1;
-        });
-
-        const countedDeptEmployees = new Set();
-
         todayRecords.forEach((entry) => {
           const hasClockIn = entry.tracker?.some(
             (t) => t.clockIn && t.clockIn !== "--:--:--"
           );
+          if (hasClockIn) present.add(entry.employeeId);
+        });
+        setPresentCount(present.size);
 
-          if (hasClockIn) {
-            const emp = employees.find(
-              (e) => String(e.employeeid) === String(entry.employeeId) // ✅ FIXED
-            );
+        // ❌ LEAVE = all employees - present employees
+        if (employees?.length) {
+          const allEmployeeIds = new Set(employees.map((e) => e.employeeid));
+          const leave = [...allEmployeeIds].filter((id) => !present.has(id)).length;
+          setLeaveCount(leave);
+        }
 
-            if (!emp) {
-              console.warn("❌ Could not find employee for:", entry.employeeId); // ✅ FIXED
-              return;
-            }
+        // 🏢 Initialize department stats
+        const departmentMap = {};
+        employees.forEach((emp) => {
+          const dept = emp.department?.trim() || "Unassigned";
+          if (!departmentMap[dept]) {
+            departmentMap[dept] = { name: dept, present: 0, total: 0 };
+          }
+          departmentMap[dept].total += 1;
+        });
 
-            const empId = emp.employeeid;
-            if (countedDeptEmployees.has(empId)) return;
-            countedDeptEmployees.add(empId);
+        // 👥 Count department-wise present
+        const countedDeptEmployees = new Set();
+        todayRecords.forEach((entry) => {
+          const hasClockIn = entry.tracker?.some(
+            (t) => t.clockIn && t.clockIn !== "--:--:--"
+          );
+          if (!hasClockIn) return;
 
-            const dept = emp.department?.trim() || "Unassigned";
+          const emp = employees.find(
+            (e) => String(e.employeeid) === String(entry.employeeId)
+          );
+          if (!emp) return;
 
-            if (departmentMap[dept]) {
-              departmentMap[dept].present += 1;
-              console.log(`✅ Counted ${empId} in dept: ${dept}`);
-            } else {
-              console.warn("❗Department not initialized for:", dept);
-            }
+          const empId = emp.employeeid;
+          if (countedDeptEmployees.has(empId)) return;
+          countedDeptEmployees.add(empId);
+
+          const dept = emp.department?.trim() || "Unassigned";
+          if (departmentMap[dept]) {
+            departmentMap[dept].present += 1;
           }
         });
 
-        const enrichedTodayRecords = setStatus(todayRecords);
-
-        // Count late arrivals
-        const lateArrivals = enrichedTodayRecords.filter(entry => entry.status === "Late");
+        // ⏰ Add status (e.g., Late)
+        const enrichedTodayRecords = setStatus(todayRecords); // assumes your custom logic exists
+        const lateArrivals = enrichedTodayRecords.filter(
+          (entry) => entry.status === "Late"
+        );
         setLateCount(lateArrivals.length);
-        // Convert to array with percentage & color
+
+        // 🎨 Build department summary
         const colorClasses = [
           "bg-green-500", "bg-blue-500", "bg-purple-500",
           "bg-yellow-500", "bg-pink-500", "bg-indigo-500"
@@ -130,13 +123,15 @@ const AdminDashboard = () => {
 
         const deptStats = Object.values(departmentMap).map((dept, index) => ({
           ...dept,
-          percentage: Math.round((dept.present / dept.total) * 100),
+          percentage: dept.total > 0
+            ? Math.round((dept.present / dept.total) * 100)
+            : 0,
           color: colorClasses[index % colorClasses.length]
         }));
 
         setDepartmentAttendance(deptStats);
       } catch (err) {
-        console.error(err);
+        console.error("Attendance fetch error:", err);
       }
     };
 

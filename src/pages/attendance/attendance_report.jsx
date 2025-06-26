@@ -10,8 +10,8 @@ export default function AttendanceTable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getAllAttendance();
-        const enrichedData = setStatus(data?.data || []);
+        const records = await getAllAttendance(); // 🔄 Firebase returns flat array
+        const enrichedData = setStatus(records); // ✅ no .data needed
         setAttendanceData(enrichedData);
       } catch (error) {
         console.error("Failed to fetch attendance data:", error);

@@ -37,6 +37,7 @@ function App() {
         </Route>
 
         {/* Catch-all: redirect unknown routes to login */}
+        {/* <Route path="/addemployee" element={<AddEmployee />} /> */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
