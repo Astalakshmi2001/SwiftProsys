@@ -1,29 +1,14 @@
-import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+// ProtectedRoute.jsx
+import { Navigate, Outlet } from "react-router-dom";
 
-// roleAllowed is a string or array of allowed roles for the route
 const ProtectedRoute = ({ roleAllowed }) => {
-  const token = localStorage.getItem('token');
-  const role = localStorage.getItem('role');
+  const role = localStorage.getItem("role");
+  const isLoggedIn = localStorage.getItem("loggedIn");
 
-  if (!token) {
-    // No token → not logged in
-    return <Navigate to="/login" replace />;
-  }
+  if (!isLoggedIn) return <Navigate to="/login" replace />;
+  if (role !== roleAllowed) return <Navigate to="/unauthorized" replace />;
 
-  if (Array.isArray(roleAllowed)) {
-    if (!roleAllowed.includes(role)) {
-      // Logged in but wrong role
-      return <Navigate to="/login" replace />;
-    }
-  } else {
-    if (role !== roleAllowed) {
-      return <Navigate to="/login" replace />;
-    }
-  }
-
-  // Authorized, render child routes
-  return <Outlet />;
+  return <Outlet />; // ✅ This renders nested child routes
 };
 
 export default ProtectedRoute;

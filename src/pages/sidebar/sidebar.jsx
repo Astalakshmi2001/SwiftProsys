@@ -3,6 +3,7 @@ import "../../App.css";
 import mainlogo from "../../assets/mainlogo.png";
 import logo from "../../assets/logo.png";
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { getAuth, signOut } from "firebase/auth";
 
 function Sidebar({ collapsed }) {
   const location = useLocation();
@@ -51,10 +52,16 @@ function Sidebar({ collapsed }) {
                 </Link>
               ) : (
                 <button
-                  onClick={() => {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('role');
-                    navigate('/login'); // redirect to login
+                  onClick={async () => {
+                    const auth = getAuth();
+                    try {
+                      await signOut(auth); // Firebase logout
+                      localStorage.clear();
+                      navigate("/login", { replace: true });
+                    } catch (err) {
+                      console.error("Logout failed:", err.message);
+                      alert("Logout failed: " + err.message);
+                    }
                   }}
                   className="flex items-center w-full p-2 text-left no-underline text-gray-800 rounded-md hover:bg-maincolor hover:text-white transition-colors"
                 >

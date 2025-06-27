@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { departmentPositionMap, departments } from '../../constant/data';
 import { Link } from 'react-router-dom';
-import { API_URL } from '../../constant/api';
+// import { API_URL } from '../../constant/api';
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "../../firebaseConfig";
 
 const AddEmployee = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,8 +17,6 @@ const AddEmployee = () => {
     phone: '',
     employeeid: '',
     password: '',
-    profileImage: null,
-    previewImage: '',
     joinDate: '',
     role: ''
   });
@@ -34,60 +35,62 @@ const AddEmployee = () => {
 
   const availablePositions = departmentPositionMap[employee.department] || [];
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setEmployee(prev => ({
-        ...prev,
-        profileImage: file,
-        previewImage: URL.createObjectURL(file)
-      }));
-    }
-  };
+  // const handleImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     setEmployee(prev => ({
+  //       ...prev,
+  //       profileImage: file,
+  //       previewImage: URL.createObjectURL(file)
+  //     }));
+  //   }
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${API_URL}/api/employees`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(employee)
+      const auth = getAuth();
+
+      // Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        employee.email,
+        employee.password
+      );
+
+      const user = userCredential.user;
+
+      // Prepare Firestore-safe data
+      const { password, ...employeeData } = employee;
+
+      await addDoc(collection(db, "employees"), {
+        ...employeeData,
+        uid: user.uid,
+        createdAt: new Date().toISOString()
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to add employee');
-      }
+      setSuccessMessage("Employee registered successfully");
+      setTimeout(() => setSuccessMessage(""), 3000);
 
-      const data = await response.json();
-
-      setSuccessMessage(data.message || 'Employee added successfully!');
-      setTimeout(() => setSuccessMessage(''), 3000);
-
-      console.log('Token:', data.token);
-
+      // Reset form
       setEmployee({
         firstName: '',
         lastName: '',
         email: '',
+        
         position: '',
         department: '',
         phone: '',
         employeeid: '',
         password: '',
-        profileImage: null,
-        previewImage: '',
         joinDate: '',
         role: ''
       });
 
-      onAddEmployee?.({ id: Date.now(), ...employee });
-
-    } catch (err) {
-      console.error('Error submitting employee:', err);
+    } catch (error) {
+      console.error("Registration error:", error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -96,7 +99,7 @@ const AddEmployee = () => {
   return (
     <div className="container-fluid bg-gray-100 px-0">
       <div className="bg-white p-3 rounded">
-        <Link to="/emplist" className="mb-6 text-indigo-600 text-decoration-none">
+        <Link to="/admin/emplist" className="mb-6 text-indigo-600 text-decoration-none">
           ← Back to Employee List
         </Link>
         <h2 className="text-2xl font-bold mb-6 mt-6">Add New Employee</h2>
@@ -223,7 +226,7 @@ const AddEmployee = () => {
                 className="border border-gray-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
             </div>
-            <div className="flex items-center space-x-6">
+            {/* <div className="flex items-center space-x-6">
               <label className="block">
                 <span className="text-gray-700">Profile Image</span>
                 <input
@@ -244,7 +247,7 @@ const AddEmployee = () => {
                   className="w-[80px] h-[80px] ring-2 ring-indigo-500 object-cover"
                 />
               )}
-            </div>
+            </div> */}
           </div>
           <button
             type="submit"

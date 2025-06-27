@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import sampleImage from '../../assets/sample.jpg';
-import { jwtDecode } from "jwt-decode";
-import { API_URL } from '../../constant/api';
+// import { API_URL } from '../../constant/api';
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../../firebaseConfig";
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -14,54 +16,51 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setErrorMsg('');
-    setLoading(true);
+
+    setErrorMsg(""); // Clear any previous error
+
+    if (!username || !password) {
+      setErrorMsg("Please enter both employee ID and password.");
+      return;
+    }
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ employeeid: username, password }),
-      });
+      // 🔍 Step 1: Find user by employeeid in Firestore
+      const q = query(collection(db, "employees"), where("employeeid", "==", username.trim()));
+      const snapshot = await getDocs(q);
 
-      const data = await response.json();
-      setLoading(false);
-
-      if (!response.ok) {
-        setErrorMsg(data.error || 'Login failed');
-        return;
+      if (snapshot.empty) {
+        throw new Error("Invalid Employee ID");
       }
 
-      const token = data.token;
+      const employee = snapshot.docs[0].data();
 
-      // ✅ Decode the token to get role
-      const decoded = jwtDecode(token); // Not jwt_decode.default!
-      const role = decoded.role;
+      if (!employee?.email) {
+        throw new Error("Employee email is missing in Firestore.");
+      }
 
-      // ✅ Store in localStorage
-      localStorage.setItem('token', token);
-      localStorage.setItem('role', role);
+      const { email, role = "user" } = employee;
 
-      if (role === 'admin') {
-        navigate('/admin');
-      } else if (role === 'user') {
-        navigate('/user');
+      // 🔐 Step 2: Firebase Auth Login
+      const auth = getAuth();
+      await signInWithEmailAndPassword(auth, email, password);
+
+      // 🔒 Optional: Save role locally (not secure, use only for UI)
+      localStorage.setItem("role", role);
+      localStorage.setItem("loggedIn", "true");
+
+      // 🎯 Step 3: Navigate based on role
+      if (role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/user");
       }
 
     } catch (err) {
-      console.error(err);
-      setLoading(false);
-      setErrorMsg('Something went wrong. Try again.');
+      console.error("Login failed:", err);
+      setErrorMsg(`Login failed: ${err.message || "Unknown error occurred"}`);
     }
   };
-
-  useEffect(() => {
-    const role = localStorage.getItem('role');
-    if (role === 'admin') navigate('/admin');
-    else if (role === 'user') navigate('/user');
-  }, []);
 
 
   return (

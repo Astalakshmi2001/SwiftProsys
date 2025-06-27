@@ -3,6 +3,8 @@ import dayjs from "dayjs";
 import useAuth from "../hooks/useAuth";
 import useAttendance from "../hooks/useAttendance";
 import { projects } from "../constant/data";
+import { updateDoc, collection, getDocs, query, where, doc } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
 
 const AUTO_PUNCH_OUT_DELAY = 30 * 60 * 1000;
 
@@ -43,19 +45,18 @@ const ClockInDashboard = () => {
   }, []);
 
   useEffect(() => {
+    if (!user?.employeeid) return;
     const fetchAttendance = async () => {
-      if (!user?.employeeid) return;
       try {
-        const response = await getEmployeeAttendance(user.employeeid);
-        if (response?.data) {
-          setAttendanceData(response.data.reverse());
-        }
+        const records = await getEmployeeAttendance(user.employeeid);
+        setAttendanceData(records);
       } catch (error) {
         console.error("Error fetching attendance:", error.message);
       }
     };
     fetchAttendance();
   }, [user]);
+
 
   const handleClockIn = async () => {
     if (!user) return alert("User not found.");
@@ -66,28 +67,35 @@ const ClockInDashboard = () => {
 
     const time = dayjs();
     const formattedTime = time.format("HH:mm:ss");
+    const today = time.format("YYYY-MM-DD");
 
     if (!isClockedIn) {
+      // 🕒 CLOCK IN
       const punchInPayload = {
         employeeId: user.employeeid,
         firstName: user.firstName,
         project: selectedProject,
-        date: currentTime.format("ddd, DD MMMM YYYY"),
+        date: today,
         shift: selectedShift,
         tracker: [
           {
             clockIn: formattedTime,
-            clockOut: "--:--:--"
-          }
-        ]
+            clockOut: "--:--:--",
+          },
+        ],
+        createdAt: new Date(),
       };
 
       try {
         await storeAttendance(punchInPayload);
-        localStorage.setItem("attendanceSession", JSON.stringify({
-          isClockedIn: true,
-          startTime: time.toISOString(),
-        }));
+
+        localStorage.setItem(
+          "attendanceSession",
+          JSON.stringify({
+            isClockedIn: true,
+            startTime: time.toISOString(),
+          })
+        );
 
         setStartTime(time);
         setIsClockedIn(true);
@@ -95,25 +103,37 @@ const ClockInDashboard = () => {
         setEndTime(null);
 
         const updated = await getEmployeeAttendance(user.employeeid);
-        setAttendanceData(updated?.data?.reverse() || []);
+        setAttendanceData(updated);
       } catch (error) {
         console.error("Failed to store punch-in:", error.message);
       }
-
     } else {
-      const punchOutPayload = {
-        employeeId: user?.employeeid,
-        firstName: user?.firstName,
-        date: currentTime.format("ddd, DD MMMM YYYY"),
-        tracker: [
-          {
-            clockOut: formattedTime,
-          },
-        ],
-      };
-
+      // 🕘 CLOCK OUT
       try {
-        await storeAttendance(punchOutPayload);
+        const todayRecord = attendanceData.find(
+          (entry) =>
+            entry.date === today &&
+            entry.tracker?.some((t) => t.clockOut === "--:--:--")
+        );
+
+        if (!todayRecord || !todayRecord.id) {
+          throw new Error("No active session found to punch out.");
+        }
+
+        const trackerIndex = todayRecord.tracker.findIndex(
+          (t) => t.clockOut === "--:--:--"
+        );
+
+        if (trackerIndex === -1) {
+          throw new Error("No incomplete tracker found.");
+        }
+
+        const updatedTracker = [...todayRecord.tracker];
+        updatedTracker[trackerIndex].clockOut = formattedTime;
+
+        const docRef = doc(db, "attendance", todayRecord.id);
+        await updateDoc(docRef, { tracker: updatedTracker });
+
         localStorage.removeItem("attendanceSession");
 
         setEndTime(time);
@@ -122,9 +142,10 @@ const ClockInDashboard = () => {
         setElapsedTime(null);
 
         const updated = await getEmployeeAttendance(user.employeeid);
-        setAttendanceData(updated?.data?.reverse() || []);
+        setAttendanceData(updated);
       } catch (error) {
         console.error("Failed to store punch-out:", error.message);
+        alert(error.message);
       }
     }
   };
@@ -134,25 +155,19 @@ const ClockInDashboard = () => {
       if (idleTimer.current) clearTimeout(idleTimer.current);
       if (isClockedIn && !endTime) {
         idleTimer.current = setTimeout(() => {
-          console.log("⏰ Auto punch out due to inactivity");
-          handleClockIn(); // auto punch out
+          console.warn("⏰ Auto punch-out due to inactivity.");
+          handleClockIn(); // triggers punch out
         }, AUTO_PUNCH_OUT_DELAY);
       }
     };
 
-    // Listen to user interactions
-    const activityEvents = ["mousemove", "keydown", "mousedown", "touchstart"];
-    activityEvents.forEach(event =>
-      window.addEventListener(event, resetIdleTimer)
-    );
+    const activityEvents = ["mousemove", "mousedown", "keydown", "touchstart", "scroll"];
+    activityEvents.forEach(event => window.addEventListener(event, resetIdleTimer));
 
-    // Start initial timer
-    resetIdleTimer();
+    resetIdleTimer(); // start the timer immediately
 
     return () => {
-      activityEvents.forEach(event =>
-        window.removeEventListener(event, resetIdleTimer)
-      );
+      activityEvents.forEach(event => window.removeEventListener(event, resetIdleTimer));
       if (idleTimer.current) clearTimeout(idleTimer.current);
     };
   }, [isClockedIn, endTime]);
