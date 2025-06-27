@@ -57,6 +57,7 @@ const ClockInDashboard = () => {
     fetchAttendance();
   }, [user]);
 
+
   const handleClockIn = async () => {
     if (!user) return alert("User not found.");
     if (!selectedProject || !selectedShift) {
@@ -66,27 +67,35 @@ const ClockInDashboard = () => {
 
     const time = dayjs();
     const formattedTime = time.format("HH:mm:ss");
+    const today = time.format("YYYY-MM-DD");
 
     if (!isClockedIn) {
-      // CLOCK IN
+      // 🕒 CLOCK IN
       const punchInPayload = {
         employeeId: user.employeeid,
         firstName: user.firstName,
         project: selectedProject,
-        date: currentTime.format("YYYY-MM-DD"),
+        date: today,
         shift: selectedShift,
-        tracker: [{
-          clockIn: formattedTime,
-          clockOut: "--:--:--"
-        }]
+        tracker: [
+          {
+            clockIn: formattedTime,
+            clockOut: "--:--:--",
+          },
+        ],
+        createdAt: new Date(),
       };
 
       try {
         await storeAttendance(punchInPayload);
-        localStorage.setItem("attendanceSession", JSON.stringify({
-          isClockedIn: true,
-          startTime: time.toISOString(),
-        }));
+
+        localStorage.setItem(
+          "attendanceSession",
+          JSON.stringify({
+            isClockedIn: true,
+            startTime: time.toISOString(),
+          })
+        );
 
         setStartTime(time);
         setIsClockedIn(true);
@@ -98,22 +107,32 @@ const ClockInDashboard = () => {
       } catch (error) {
         console.error("Failed to store punch-in:", error.message);
       }
-
     } else {
-      // CLOCK OUT
+      // 🕘 CLOCK OUT
       try {
-        const latest = attendanceData?.[0];
-        if (!latest || !latest.id) {
+        const todayRecord = attendanceData.find(
+          (entry) =>
+            entry.date === today &&
+            entry.tracker?.some((t) => t.clockOut === "--:--:--")
+        );
+
+        if (!todayRecord || !todayRecord.id) {
           throw new Error("No active session found to punch out.");
         }
 
-        const updatedTracker = [...latest.tracker];
-        updatedTracker[updatedTracker.length - 1].clockOut = formattedTime;
+        const trackerIndex = todayRecord.tracker.findIndex(
+          (t) => t.clockOut === "--:--:--"
+        );
 
-        const docRef = doc(db, "attendance", latest.id);
-        await updateDoc(docRef, {
-          tracker: updatedTracker
-        });
+        if (trackerIndex === -1) {
+          throw new Error("No incomplete tracker found.");
+        }
+
+        const updatedTracker = [...todayRecord.tracker];
+        updatedTracker[trackerIndex].clockOut = formattedTime;
+
+        const docRef = doc(db, "attendance", todayRecord.id);
+        await updateDoc(docRef, { tracker: updatedTracker });
 
         localStorage.removeItem("attendanceSession");
 
@@ -126,6 +145,7 @@ const ClockInDashboard = () => {
         setAttendanceData(updated);
       } catch (error) {
         console.error("Failed to store punch-out:", error.message);
+        alert(error.message);
       }
     }
   };
@@ -135,25 +155,19 @@ const ClockInDashboard = () => {
       if (idleTimer.current) clearTimeout(idleTimer.current);
       if (isClockedIn && !endTime) {
         idleTimer.current = setTimeout(() => {
-          console.log("⏰ Auto punch out due to inactivity");
-          handleClockIn(); // auto punch out
+          console.warn("⏰ Auto punch-out due to inactivity.");
+          handleClockIn(); // triggers punch out
         }, AUTO_PUNCH_OUT_DELAY);
       }
     };
 
-    // Listen to user interactions
-    const activityEvents = ["mousemove", "keydown", "mousedown", "touchstart"];
-    activityEvents.forEach(event =>
-      window.addEventListener(event, resetIdleTimer)
-    );
+    const activityEvents = ["mousemove", "mousedown", "keydown", "touchstart", "scroll"];
+    activityEvents.forEach(event => window.addEventListener(event, resetIdleTimer));
 
-    // Start initial timer
-    resetIdleTimer();
+    resetIdleTimer(); // start the timer immediately
 
     return () => {
-      activityEvents.forEach(event =>
-        window.removeEventListener(event, resetIdleTimer)
-      );
+      activityEvents.forEach(event => window.removeEventListener(event, resetIdleTimer));
       if (idleTimer.current) clearTimeout(idleTimer.current);
     };
   }, [isClockedIn, endTime]);

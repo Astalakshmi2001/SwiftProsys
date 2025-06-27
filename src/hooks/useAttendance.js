@@ -47,7 +47,6 @@ const useAttendance = () => {
       const q = query(
         collection(db, "attendance"),
         where("employeeId", "==", employeeId),
-        orderBy("createdAt", "desc")
       );
       const snapshot = await getDocs(q);
       return snapshot.docs.map(doc => ({

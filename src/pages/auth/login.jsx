@@ -17,21 +17,39 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    setErrorMsg(""); // Clear any previous error
+
+    if (!username || !password) {
+      setErrorMsg("Please enter both employee ID and password.");
+      return;
+    }
+
     try {
-      const q = query(collection(db, "employees"), where("employeeid", "==", employeeid));
+      // 🔍 Step 1: Find user by employeeid in Firestore
+      const q = query(collection(db, "employees"), where("employeeid", "==", username.trim()));
       const snapshot = await getDocs(q);
-      if (snapshot.empty) throw new Error("Invalid Employee ID");
+
+      if (snapshot.empty) {
+        throw new Error("Invalid Employee ID");
+      }
 
       const employee = snapshot.docs[0].data();
-      const email = employee.email;
-      const role = employee.role;
 
+      if (!employee?.email) {
+        throw new Error("Employee email is missing in Firestore.");
+      }
+
+      const { email, role = "user" } = employee;
+
+      // 🔐 Step 2: Firebase Auth Login
       const auth = getAuth();
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, email, password);
 
-      localStorage.setItem("role", role); // For AuthContext use
+      // 🔒 Optional: Save role locally (not secure, use only for UI)
+      localStorage.setItem("role", role);
+      localStorage.setItem("loggedIn", "true");
 
-      // 🎯 Navigate based on role
+      // 🎯 Step 3: Navigate based on role
       if (role === "admin") {
         navigate("/admin");
       } else {
@@ -39,10 +57,11 @@ function Login() {
       }
 
     } catch (err) {
-      console.error("Login failed:", err.message);
-      setErrorMsg("Login failed: " + err.message);
+      console.error("Login failed:", err);
+      setErrorMsg(`Login failed: ${err.message || "Unknown error occurred"}`);
     }
   };
+
 
   return (
     <div className="w-full h-screen flex p-0 m-0">
