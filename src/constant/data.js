@@ -1,44 +1,39 @@
 export const departments = [
-  { key: "Production", label: "Production" },
-  { key: "Quality_Control", label: "QC" },
-  { key: "Quality_Assurance", label: "QA" },
-  { key: "Final_Processing", label: "Final Checker" },
   { key: "Project_Management", label: "Project Management" },
   { key: "HR_and_Admin", label: "HR/Admin" },
   { key: "IT_and_Systems", label: "IT & Systems" },
+  { key: "Vendor_Management", label: "Vendor Manager" },
+  { key: "Quality_Management", label: "Quality Management" },
   { key: "Finance", label: "Finance" },
-  { key: "Vendor_Management", label: "Vendor Manager" }
 ];
 
 export const departmentPositionMap = {
-  Production: [
-    { key: "production_executive", label: "Production Executive" },
-    { key: "basic_trainer", label: "Basic Trainer" }
-  ],
-  Quality_Control: [
-    { key: "quality_checker", label: "FQC" },
-    { key: "Random_quality", label: "RQC" }
-  ],
-  Quality_Assurance: [
-    { key: "quality_Assurance", label: "QA" },
-    { key: "quality_manager", label: "Quality Manager" }
-  ],
-  Final_Processing: [
-    { key: "Final_Checker", label: "Final" }
-  ],
   Project_Management: [
     { key: "Project_management", label: "Project Manager" },
-    { key: "Asst_Project_management", label: "Assistant PM" }
+    { key: "Asst_Project_management", label: "Assistant PM" },
+    { key: "Final_Checker", label: "Project Leader" },
+    { key: "Production", label: "Data Entry" },
+    { key: "Quality", label: "Quality Control" },
+    { key: "Quality_PR", label: "Proof Reader" },
+    { key: "Random_Quality", label: "Random QA" }
+
   ],
   HR_and_Admin: [
     { key: "HR", label: "HR Manager" },
     { key: "AHR", label: "HR Executive" },
-    { key: "AD", label: "Admin Assistant" }
+    { key: "AD", label: "Admin Assistant" },
+    { key: "Basic_training", label: "Trainer" }
   ],
   IT_and_Systems: [
+    { key: "Manager", label: "IT Manager" },
+    { key: "Asst_Manager", label: "IT Assistant Manager" },
     { key: "System_Admin", label: "System Admin" },
     { key: "Software_team", label: "Software Engineer" },
     { key: "Support", label: "IT Support" }
+  ],
+  Quality_Management: [
+    { key: "Quality_Manager", label: "Quality Manager" },
+    { key: "Analyst", label: "Quality Analyst" }
   ],
   Finance: [
     { key: "Finance_management", label: "Finance Manager" },
@@ -46,7 +41,8 @@ export const departmentPositionMap = {
     { key: "Billing", label: "Billing Executive" }
   ],
   Vendor_Management: [
-    { key: "Vendor_management", label: "Vendor Manager" }
+    { key: "Vendor_management", label: "Vendor Manager" },
+    { key: "Asst_Vendor", label: "Vendor Assistant" }
   ]
 };
 
@@ -65,5 +61,7 @@ export const projects = [
   { key: "agrigento_italian", label: "Agrigento Italian" },
   { key: "calabria_italian", label: "Calabria Italian" },
   { key: "lloyds_register", label: "Lloyd’s Register of Shipping" },
-  { key: "training_manpowers", label: "Training Manpowers" }
+  { key: "training_manpowers", label: "Training Manpowers" },
+  { key: "Other", label: "Others" },
+
 ];

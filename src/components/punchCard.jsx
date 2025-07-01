@@ -260,7 +260,7 @@ const ClockInDashboard = () => {
           <table className="w-full text-left border">
             <thead className="bg-gray-100">
               <tr>
-                <th className="p-2">#</th>
+                <th className="p-2">S.No.</th>
                 <th className="p-2">Project</th>
                 <th className="p-2">Date</th>
                 <th className="p-2">Shift</th>

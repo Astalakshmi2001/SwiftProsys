@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import useAttendance from '../../hooks/useAttendance';
 import dayjs from 'dayjs';
+import duration from "dayjs/plugin/duration";
+dayjs.extend(duration);
 import AdminDashboard from "./Admin_dashboard";
 
 export default function AttendanceTable() {
@@ -80,28 +82,58 @@ export default function AttendanceTable() {
               <th className="border px-3 py-2 text-left">Shift</th>
               <th className="border px-3 py-2 text-left">Punch In</th>
               <th className="border px-3 py-2 text-left">Punch Out</th>
+              <th className="border px-3 py-2 text-left">Total Active Hours</th>
             </tr>
           </thead>
           <tbody>
-            {attendanceData.map((item, i) => (
-              <tr key={i} className="hover:bg-gray-50">
-                <td className="border px-3 py-2">{item.date}</td>
-                <td className="border px-3 py-2">{item.employeeId}</td>
-                <td className="border px-3 py-2">{item.firstName}</td>
-                <td className="border px-3 py-2">
-                  <div className="flex justify-between items-center">
-                    <span>{item.shift}</span>
-                    <span
-                      className={`inline-block px-2 py-0.5 rounded-full text-white text-xs ${item.status === "Late" ? "bg-red-500" : "bg-blue-500"}`}
-                    >
-                      {item.status}
-                    </span>
-                  </div>
-                </td>
-                <td className="border px-3 py-2">{item.tracker?.[0]?.clockIn || "--:--:--"}</td>
-                <td className="border px-3 py-2">{item.tracker?.[item.tracker.length - 1]?.clockOut || "--:--:--"}</td>
-              </tr>
-            ))}
+            {attendanceData.map((item, i) => {
+              const clockIn = item.tracker?.[0]?.clockIn;
+              const clockOut = item.tracker?.[item.tracker.length - 1]?.clockOut;
+              let totalHours = "--:--:--";
+
+              // ✅ Only calculate if both are present
+              if (clockIn && clockOut) {
+                try {
+                  // ⏱ Assume both are in format: "HH:mm:ss"
+                  const today = new Date().toISOString().split("T")[0]; // "2025-07-01"
+                  const inTime = new Date(`${today}T${clockIn}`);
+                  const outTime = new Date(`${today}T${clockOut}`);
+
+                  if (!isNaN(inTime) && !isNaN(outTime) && outTime > inTime) {
+                    const diffMs = outTime - inTime;
+                    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+                    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+                    totalHours = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                  }
+                } catch (err) {
+                  console.error("Time calculation error:", err);
+                }
+              }
+
+              return (
+                <tr key={i} className="hover:bg-gray-50">
+                  <td className="border px-3 py-2">{item.date}</td>
+                  <td className="border px-3 py-2">{item.employeeId}</td>
+                  <td className="border px-3 py-2">{item.firstName}</td>
+                  <td className="border px-3 py-2">
+                    <div className="flex justify-between items-center">
+                      <span>{item.shift}</span>
+                      <span
+                        className={`inline-block px-2 py-0.5 rounded-full text-white text-xs ${item.status === "Late" ? "bg-red-500" : "bg-blue-500"}`}
+                      >
+                        {item.status}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="border px-3 py-2">{clockIn || "--:--:--"}</td>
+                  <td className="border px-3 py-2">{clockOut || "--:--:--"}</td>
+                  <td className="border px-3 py-2">{totalHours}</td>
+                </tr>
+              );
+            })}
+
           </tbody>
         </table>
       </div>
