@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
-import sampleImage from '../../assets/sample.jpg';
+import sampleImage from '../../assets/sample2.jpg';
 // import { API_URL } from '../../constant/api';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { collection, query, where, getDocs } from "firebase/firestore";
