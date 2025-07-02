@@ -2,29 +2,20 @@ import React, { useEffect, useState } from "react";
 import useAttendance from '../../hooks/useAttendance';
 import dayjs from 'dayjs';
 import duration from "dayjs/plugin/duration";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+
+// Extend dayjs plugins
 dayjs.extend(duration);
-import AdminDashboard from "./Admin_dashboard";
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 export default function AttendanceTable() {
   const { getAllAttendance } = useAttendance();
   const [attendanceData, setAttendanceData] = useState([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const records = await getAllAttendance(); // 🔄 Firebase returns flat array
-        const enrichedData = setStatus(records); // ✅ no .data needed
-        setAttendanceData(enrichedData);
-      } catch (error) {
-        console.error("Failed to fetch attendance data:", error);
-      }
-    };
-
-    fetchData();
-  }, [getAllAttendance]);
-
   const shiftConfig = {
-    general: ["08:30", "09:00", "09:30", "10:00"],
+    "general": ["08:30", "09:00", "09:30", "10:00"],
     "shift-1": ["06:00", "07:00"],
     "shift-2": ["13:00", "14:00"]
   };
@@ -33,23 +24,21 @@ export default function AttendanceTable() {
     return data.map((item) => {
       const shift = item.shift?.toLowerCase();
       const shiftTimes = shiftConfig[shift];
+      const firstClockInStr = item.tracker?.[0]?.clockIn;
 
-      // Get first clock-in time
-      const firstClockIn = item.tracker?.[0]?.clockIn;
-
-      if (!shiftTimes || !firstClockIn) {
+      if (!shiftTimes || !firstClockInStr) {
         return { ...item, status: "Unknown" };
       }
 
-      const clockIn = dayjs(firstClockIn, "HH:mm:ss");
+      const referenceDate = dayjs().format("YYYY-MM-DD");
+      const clockIn = dayjs(`${referenceDate} ${firstClockInStr}`, "YYYY-MM-DD HH:mm:ss");
 
-      // Compare clockIn to all valid shift start times
       const isOnTime = shiftTimes.some((shiftTimeStr) => {
-        const shiftStart = dayjs(shiftTimeStr, "HH:mm");
-        const graceStart = shiftStart.subtract(10, "minute"); // early window
-        const graceEnd = shiftStart.add(5, "minute");         // late grace
+        const shiftStart = dayjs(`${referenceDate} ${shiftTimeStr}`, "YYYY-MM-DD HH:mm");
+        const graceStart = shiftStart.subtract(10, "minute");
+        const graceEnd = shiftStart.add(5, "minute");
 
-        return clockIn.isAfter(graceStart) && clockIn.isBefore(graceEnd.add(1, "second"));
+        return clockIn.isSameOrAfter(graceStart) && clockIn.isSameOrBefore(graceEnd);
       });
 
       return {
@@ -58,6 +47,20 @@ export default function AttendanceTable() {
       };
     });
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const records = await getAllAttendance();
+        const enrichedData = setStatus(records);
+        setAttendanceData(enrichedData);
+      } catch (error) {
+        console.error("Failed to fetch attendance data:", error);
+      }
+    };
+
+    fetchData();
+  }, [getAllAttendance]);
 
   return (
     <div className="container-fluid bg-gray-100 px-0">
@@ -91,11 +94,9 @@ export default function AttendanceTable() {
               const clockOut = item.tracker?.[item.tracker.length - 1]?.clockOut;
               let totalHours = "--:--:--";
 
-              // ✅ Only calculate if both are present
               if (clockIn && clockOut) {
                 try {
-                  // ⏱ Assume both are in format: "HH:mm:ss"
-                  const today = new Date().toISOString().split("T")[0]; // "2025-07-01"
+                  const today = new Date().toISOString().split("T")[0];
                   const inTime = new Date(`${today}T${clockIn}`);
                   const outTime = new Date(`${today}T${clockOut}`);
 
@@ -133,7 +134,6 @@ export default function AttendanceTable() {
                 </tr>
               );
             })}
-
           </tbody>
         </table>
       </div>
