@@ -13,7 +13,7 @@ export const departmentPositionMap = {
   Management: [
     { key: "COO", label: "Chief Operating Officer" }
   ],
-  Manager: [
+  GM: [
     { key: "GM", label: "General Manager" }
   ],
   Project_Management: [
