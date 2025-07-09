@@ -1,6 +1,5 @@
 export const departments = [
   { key: "Management", label: "Management" },
-  { key: "GM", label: "General Manager" },
   { key: "Project_Management", label: "Project Management" },
   { key: "HR_and_Admin", label: "HR/Admin" },
   { key: "IT_and_Systems", label: "IT & Systems" },
@@ -13,10 +12,9 @@ export const departmentPositionMap = {
   Management: [
     { key: "COO", label: "Chief Operating Officer" }
   ],
-  GM: [
-    { key: "GM", label: "General Manager" }
-  ],
+
   Project_Management: [
+    { key: "General_Manager", label: "General Manager" },
     { key: "Project_management", label: "Project Manager" },
     { key: "Asst_Project_management", label: "Assistant PM" },
     { key: "Final_Checker", label: "Project Leader" },
