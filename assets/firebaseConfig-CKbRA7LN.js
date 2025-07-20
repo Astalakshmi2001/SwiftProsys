@@ -1,1 +1,0 @@
-import{l as s,m as e}from"./firebase-A1TrhjMY.js";const a={apiKey:"AIzaSyCbZgYCUT3mOHY7DnFJJrODCZYnsnQdoFA",authDomain:"swiftprosyshrms.firebaseapp.com",projectId:"swiftprosyshrms",storageBucket:"swiftprosyshrms.firebasestorage.app",messagingSenderId:"570342230026",appId:"1:570342230026:web:e424ae6d210af995f7f7f3",measurementId:"G-P2QR7NCJK7"},r=e(a),p=s(r);export{p as d};
