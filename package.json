@@ -1,6 +1,7 @@
 {
   "name": "swiftprosyshrm",
   "private": true,
+  "homepage": "https://app.swiftdata.co.in",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
