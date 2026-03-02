@@ -13,6 +13,8 @@ const EmployeeList = lazy(() => import('./pages/attendance/empList'));
 const AdminScreen = lazy(() => import('./screens/adminScreen'));
 const AttendanceReport = lazy(() => import('./pages/attendance/attendance_report'));
 const AdminDashboard = lazy(() => import('./pages/attendance/Admin_dashboard'));
+import EditEmployeeModal from './pages/attendance/editEmployeeModal';
+import ImportEmployee from './pages/attendance/importEmployee';
 
 function App() {
   return (
@@ -37,6 +39,8 @@ function App() {
               <Route path="emplist" element={<EmployeeList />} />
               <Route path="addemployee" element={<AddEmployee />} />
               <Route path="attendancereport" element={<AttendanceReport />} />
+              <Route path="editempmodal/:employeeid" element={<EditEmployeeModal />} />
+              <Route path="importemployee" element={<ImportEmployee />} />
             </Route>
           </Route>
 
